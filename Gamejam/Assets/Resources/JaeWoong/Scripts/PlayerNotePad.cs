@@ -2,15 +2,16 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
-
+//빨간색 : 1
+//파란색 : 2
+//노란색 : 3
+//보라색 : 4
 public class PlayerNotePad : MonoBehaviour
 {
     public static PlayerNotePad instance;
 
     public Text comboTimeText;
-    public Text comboText;
-    public Building buildingInfo;
-
+    
     public int touchNum;
     public int nowCombo;
 
@@ -33,12 +34,10 @@ public class PlayerNotePad : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(nowCombo);
-        comboText.text = "Combo : " + nowCombo.ToString();
-        comboTimeText.text = "Time : " + comboTime.ToString();
+        comboTimeText.text = "ComboTime : " + string.Format("{0:N1}", comboTime);
     }
 
-    public void TouchL1Pad()//왼쪽 위 노트를 눌렀을 때
+    public void TouchRedPad()//빨간색 노트를 눌렀을 때
     {
         if (!canTouch)//터치가 불가능한 상황이면 리턴
             return;
@@ -47,7 +46,7 @@ public class PlayerNotePad : MonoBehaviour
 
         CheckCombo();
     }
-    public void TouchR1Pad()//오른쪽 위 노트를 눌렀을 때
+    public void TouchBluePad()//파란색 노트를 눌렀을 때
     {
         if (!canTouch)//터치가 불가능한 상황이면 리턴
             return;
@@ -56,7 +55,7 @@ public class PlayerNotePad : MonoBehaviour
 
         CheckCombo();
     }
-    public void TouchL2Pad()//왼쪽 아래 노트를 눌렀을 때
+    public void TouchYellowPad()//노란색 노트를 눌렀을 때
     {
         if (!canTouch)//터치가 불가능한 상황이면 리턴
             return;
@@ -65,7 +64,7 @@ public class PlayerNotePad : MonoBehaviour
 
         CheckCombo();
     }
-    public void TouchR2Pad()//오른쪽 아래 노트를 눌렀을 때
+    public void TouchPurplePad()//보라색 노트를 눌렀을 때
     {
         if (!canTouch)//터치가 불가능한 상황이면 리턴
             return;
@@ -77,12 +76,12 @@ public class PlayerNotePad : MonoBehaviour
     //스킬키 누르면 canTouch = true; nowCombo = 0; comboTime = 1.0f; StartCoroutine("CheckComboTime");
     public void CheckCombo()
     {
-        if (buildingInfo == null)//만약 건물이 생성 되어 있지 않다면
+        if (GameManager.instance.buildingList[0] == null)//만약 건물이 생성 되어 있지 않다면
         {
             Debug.Log("sorry buildinginfo is null");
             return;
         }
-        if (touchNum != buildingInfo.notePattern[nowCombo])//만약 콤보를 실패시켰다면
+        if (touchNum != GameManager.instance.buildingList[0].notePattern[nowCombo])//만약 콤보를 실패시켰다면
         {
             StartCoroutine("TouchFails");
             StopCoroutine("CheckComboTime");
@@ -91,20 +90,26 @@ public class PlayerNotePad : MonoBehaviour
         }
         else//만약 콤보를 성공시켰다면
         {
-            if ((nowCombo + 1).Equals(buildingInfo.maxPatternNum))//만약 콤보를 완성시켰다면
+            if ((nowCombo + 1).Equals(GameManager.instance.buildingList[0].maxPatternNum))//만약 콤보를 완성시켰다면
             {
-                Destroy(buildingInfo.gameObject);//건물을 삭제 시킨다.
+                Destroy(GameManager.instance.buildingList[0].gameObject);//건물을 삭제 시킨다.
 
                 StopCoroutine("CheckComboTime");//콤보타임을 스탑 시킨다
+
                 isChkComTim = false;
+
                 comboTime = 0.0f;
                 nowCombo = 0;
+
+                GameManager.instance.AddBuilding(3);
 
                 return;
             }
 
             comboTime = 1f;
             nowCombo++;
+
+            GameManager.instance.buildingList[0].PatternToColor(GameManager.instance.buildingList[0].notePattern[nowCombo]);
 
             if (!isChkComTim)//코루틴 중복 실행 방지
                 StartCoroutine("CheckComboTime");
@@ -120,14 +125,15 @@ public class PlayerNotePad : MonoBehaviour
             yield return new WaitForSeconds(0.1f);
         }
 
-        //1초 내에 콤보를 실행 하지 못했을때
-        nowCombo = 0;//현재 콤보 0으로
         isChkComTim = false;//다시 이 코루틴을 실행 시킬 수 있게 false로 바꿔줌
+
+        canTouch = false;
+        yield return new WaitForSeconds(1f);
+        canTouch = true;
     }
 
     IEnumerator TouchFails()//콤보에 틀렸을때 실행되는 함수
     {
-        nowCombo = 0;//현재 콤보 0으로
         comboTime = 0.0f;
 
         isChkComTim = false;
