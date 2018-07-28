@@ -33,7 +33,6 @@ public class PlayerNotePad : MonoBehaviour
 
     void Update()
     {
-        Debug.Log(nowCombo);
         comboText.text = "Combo : " + nowCombo.ToString();
         comboTimeText.text = "Time : " + comboTime.ToString();
     }

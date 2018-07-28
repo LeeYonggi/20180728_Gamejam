@@ -6,7 +6,10 @@ enum ANIMATION_STATE
 {
     IDLE,
     JUMP,
-    ATTACK1
+    ATTACK1,
+    ATTACK2,
+    ATTACK3,
+    ATTACK4
 }
 public class CharacterAction : MonoBehaviour {
 
@@ -14,6 +17,7 @@ public class CharacterAction : MonoBehaviour {
     private Rigidbody m_Rigidbody;
 
     public int speed;
+    private Vector3 p_Velocity;
 
     internal ANIMATION_STATE Animation_state { get; set; }
 
@@ -30,10 +34,26 @@ public class CharacterAction : MonoBehaviour {
         {
             StartCoroutine("Jump");
         }
-        if(Input.GetKeyDown(KeyCode.A) && Animation_state == ANIMATION_STATE.IDLE)
+        if (Input.GetKeyDown(KeyCode.A) && Animation_state != ANIMATION_STATE.IDLE)
         {
-            StartCoroutine("Attack1");
-            
+            switch (Animation_state)
+            {
+                case ANIMATION_STATE.JUMP:
+                    Attack(ANIMATION_STATE.ATTACK1);
+                    break;
+                case ANIMATION_STATE.ATTACK1:
+                    Attack(ANIMATION_STATE.ATTACK2);
+                    break;
+                case ANIMATION_STATE.ATTACK2:
+                    Attack(ANIMATION_STATE.ATTACK3);
+                    break;
+                case ANIMATION_STATE.ATTACK3:
+                    Attack(ANIMATION_STATE.ATTACK4);
+                    break;
+                default:
+                    break;
+            }
+            StartCoroutine("AttackDelay");
         }
 	}
 
@@ -61,15 +81,21 @@ public class CharacterAction : MonoBehaviour {
         Animation_state = ANIMATION_STATE.IDLE;
     }
 
-    IEnumerator Attack1()
+    void Attack(ANIMATION_STATE state)
     {
-        m_Animator.SetInteger("Anime_State", (int)ANIMATION_STATE.JUMP);
-        Animation_state = ANIMATION_STATE.JUMP;
+        m_Animator.SetInteger("Anime_State", (int)state);
+        Animation_state = state;
+    }
+
+    IEnumerator AttackDelay()
+    {
+        p_Velocity = m_Rigidbody.velocity;
+        m_Rigidbody.useGravity = false;
+        m_Rigidbody.velocity = new Vector3(0, 0, 0);
 
         yield return new WaitForSeconds(0.5f);
 
-        m_Rigidbody.AddForce(new Vector3(0, 50 * speed));
-
-        m_Animator.SetInteger("Anime_State", (int)ANIMATION_STATE.ATTACK1);
+        m_Rigidbody.velocity = p_Velocity;
+        m_Rigidbody.useGravity = true;
     }
 }
