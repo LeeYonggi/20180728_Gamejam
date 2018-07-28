@@ -25,7 +25,25 @@ public class Building : MonoBehaviour
     void FixedUpdate ()
     {
         rb.AddForce(new Vector3(0, gravityScale, 0), ForceMode.Acceleration);
+        
     }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.gameObject.CompareTag("Player"))
+        {
+            rb.velocity = new Vector3(0, 6, 0);
+            //gravityScale = 10f;
+        }
+    }
+    //private void OnTriggerExit(Collider other)
+    //{
+    //    if (other.gameObject.CompareTag("Player"))
+    //    {
+    //        rb.velocity = new Vector3(0, 0, 0);
+    //        gravityScale = -10f;
+    //    }
+    //}
 
     private void OnBecameInvisible()
     {

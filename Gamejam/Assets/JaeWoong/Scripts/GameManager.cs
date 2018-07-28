@@ -15,9 +15,12 @@ public class GameManager : MonoBehaviour
         {
             instance = this;
         }
+        
+    }
+    private void Start()
+    {
         StartCoroutine("MakeBuilding");
     }
-    
     void Update()
     {
 
@@ -26,12 +29,14 @@ public class GameManager : MonoBehaviour
     IEnumerator MakeBuilding()
     {
         GameObject g = Instantiate<GameObject>(building);
+
         Building b = g.GetComponent<Building>();
 
         b.gravityScale = -10f;
         b.maxPatternNum = 4;
 
         b.notePattern = new int[b.maxPatternNum];
+
         b.notePattern[0] = 1;
         b.notePattern[1] = 2;
         b.notePattern[2] = 3;
